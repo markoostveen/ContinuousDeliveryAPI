@@ -16,6 +16,8 @@ namespace ContinuousDelivery {
 		int BuildNumber;
 		std::string ProductRing; // E.g. Nightly, Alpha, Beta, Release
 		std::string Family; // E.g. Standard Edition, Premium Edition
+		std::string Platform; // Windows, Linux or MacOs
+		std::string Architecture;// E.g. x64, x84 or ARM
 		std::string ProductName;
 	};
 
@@ -27,7 +29,9 @@ namespace ContinuousDelivery {
 		};
 
 		using BuildNumberMap = std::unordered_map<int, InstallationDetails>; // BuildNumber -> InstalationFolder
-		using ProductRingMap = std::unordered_map<std::string, BuildNumberMap>; // ProductRing -> BuildNumber
+		using ArchitectureMap = std::unordered_map<std::string, BuildNumberMap>; // Achitecture -> BuildNumber
+		using PlatformMap = std::unordered_map<std::string, ArchitectureMap>; // Platform -> Architecture
+		using ProductRingMap = std::unordered_map<std::string, PlatformMap>; // ProductRing -> Platform
 		using ProductFamilyMap = std::unordered_map<std::string, ProductRingMap>; // Product Family -> Product Ring
 		using ProductNameMap = std::unordered_map<std::string, ProductFamilyMap>; // ProductName -> ProductFamily
 

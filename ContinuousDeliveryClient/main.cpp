@@ -86,9 +86,9 @@ void RequestInstalation(std::string url,std::string localInstallPath) {
 }
 
 int main() {
-    RequestInstalation("/TestProduct/TestFamily/Test/1", InstalationDir + "\\InstallDir1");
-    RequestInstalation("/TestProduct/TestFamily/Test/2", InstalationDir + "\\InstallDir2");
-    RequestInstalation("/TestProduct2/Family2/Dev/1", InstalationDir + "\\InstallDir3");
+    RequestInstalation("/TestProduct/TestFamily/Test/Windows/x64/1", InstalationDir + "\\InstallDir1");
+    RequestInstalation("/TestProduct/TestFamily/Test/Linux/x84/2", InstalationDir + "\\InstallDir2");
+    RequestInstalation("/TestProduct2/Family2/Dev/MacOs/ARM/1", InstalationDir + "\\InstallDir3");
 
 	return 0;
 }

@@ -99,9 +99,17 @@ namespace ContinuousDelivery {
 
 		ProductRingMap& productRings = families.at(instalation.Family);
 		if (!productRings.contains(instalation.ProductRing))
-			productRings.emplace(instalation.ProductRing, BuildNumberMap());
+			productRings.emplace(instalation.ProductRing, PlatformMap());
 
-		BuildNumberMap& buildNumbers = productRings.at(instalation.ProductRing);
+		PlatformMap& platforms = productRings.at(instalation.ProductRing);
+		if (!platforms.contains(instalation.Platform))
+			platforms.emplace(instalation.Platform, ArchitectureMap());
+
+		ArchitectureMap& achitectures = platforms.at(instalation.Platform);
+		if (!achitectures.contains(instalation.Architecture))
+			achitectures.emplace(instalation.Architecture, BuildNumberMap());
+
+		BuildNumberMap& buildNumbers = achitectures.at(instalation.Architecture);
 		if (!buildNumbers.contains(instalation.BuildNumber)) {
 
 			ContinuousDelivery::PackageCollector collector(instalation.InstalationFolder);
@@ -120,11 +128,17 @@ namespace ContinuousDelivery {
 			route << "/";
 			route << instalation.ProductRing;
 			route << "/";
+			route << instalation.Platform;
+			route << "/";
+			route << instalation.Architecture;
+			route << "/";
 			route << instalation.BuildNumber;
 
+			std::cout << "Registered Manifest route: /Manifest/" + route.str() + "\n";
 			server.Get("/Manifest/" + route.str(), [&details = buildNumbers[instalation.BuildNumber]](const httplib::Request&, httplib::Response& res) {
 				res.set_content(details.FileManifest, "text/plain");
 			});
+			std::cout << "Registered Files route: /Files/" + route.str() + "\n";
 			server.set_mount_point("/Files/" + route.str(), details.InstalationDirectory.c_str());
 		}
 
@@ -142,6 +156,8 @@ namespace ContinuousDelivery {
 			emitter << YAML::Key << "InstallDir" << YAML::Value << productInstall.InstalationFolder;
 			emitter << YAML::Key << "Family" << YAML::Value << productInstall.Family;
 			emitter << YAML::Key << "Ring" << YAML::Value << productInstall.ProductRing;
+			emitter << YAML::Key << "Platform" << YAML::Value << productInstall.Platform;
+			emitter << YAML::Key << "Architecture" << YAML::Value << productInstall.Architecture;
 			emitter << YAML::Key << "BuildNumber" << YAML::Value << productInstall.BuildNumber;
 			emitter << YAML::EndMap;
 		}
@@ -170,6 +186,8 @@ namespace ContinuousDelivery {
 			install.ProductName = installSequenceValue["ProductName"].as<std::string>();
 			install.Family = installSequenceValue["Family"].as<std::string>();
 			install.ProductRing = installSequenceValue["Ring"].as<std::string>();
+			install.Platform = installSequenceValue["Platform"].as<std::string>();
+			install.Architecture = installSequenceValue["Architecture"].as<std::string>();
 			install.BuildNumber = installSequenceValue["BuildNumber"].as<int>();
 
 			AddProductInstalation(install);
@@ -205,6 +223,8 @@ namespace ContinuousDelivery {
 				|| !req.has_param("ProductName")
 				|| !req.has_param("Ring")
 				|| !req.has_param("Family")
+				|| !req.has_param("Platform")
+				|| !req.has_param("Architecture")
 				|| !req.has_param("BuildNumber")) {
 				res.status = 400;
 				return;
@@ -215,6 +235,8 @@ namespace ContinuousDelivery {
 				.BuildNumber = std::stoi(req.get_param_value("BuildNumber")),
 				.ProductRing = req.get_param_value("Ring"),
 				.Family = req.get_param_value("Family"),
+				.Platform = req.get_param_value("Platform"),
+				.Architecture = req.get_param_value("Architecture"),
 				.ProductName = req.get_param_value("InstallDir"),
 			};
 
@@ -251,10 +273,26 @@ namespace ContinuousDelivery {
 					const std::string& ring = ringIterator.first;
 					emitter << YAML::BeginMap;
 					emitter << YAML::Key << "Ring" << YAML::Value << ring;
-					emitter << YAML::Key << "BuildNumbers" << YAML::Value << YAML::BeginSeq;
-					for (const auto& buildIterator : ringIterator.second) {
-						const int& buildNumber = buildIterator.first;
-						emitter << buildNumber;
+					emitter << YAML::Key << "Platforms" << YAML::Value << YAML::BeginSeq;
+					for (const auto& platformIterator : ringIterator.second) {
+						const std::string& platform = platformIterator.first;
+						emitter << YAML::BeginMap;
+						emitter << YAML::Key << "Platform" << YAML::Value << platform;
+						emitter << YAML::Key << "Architectures" << YAML::Value << YAML::BeginSeq;
+						for (const auto& achitectureIterator : platformIterator.second) {
+							const std::string& architecture = achitectureIterator.first;
+							emitter << YAML::BeginMap;
+							emitter << YAML::Key << "Architecture" << YAML::Value << architecture;
+							emitter << YAML::Key << "BuildNumbers" << YAML::Value << YAML::BeginSeq;
+							for (const auto& buildIterator : achitectureIterator.second) {
+								const int& buildNumber = buildIterator.first;
+								emitter << buildNumber;
+							}
+							emitter << YAML::EndSeq;
+							emitter << YAML::EndMap;
+						}
+						emitter << YAML::EndSeq;
+						emitter << YAML::EndMap;
 					}
 					emitter << YAML::EndSeq;
 					emitter << YAML::EndMap;
