@@ -26,17 +26,21 @@ std::string SHA256(const char* const path)
     constexpr const std::size_t buffer_size{ 1 << 12 };
     char buffer[buffer_size];
 
-    unsigned char hash[SHA256_DIGEST_LENGTH] = { 0 };
+    auto* hash = new unsigned char[SHA256_DIGEST_LENGTH] { 0 };
 
-    SHA256_CTX ctx;
-    SHA256_Init(&ctx);
-
+    std::stringstream ss;
     while (fp.good()) {
-        fp.read(buffer, buffer_size);
-        SHA256_Update(&ctx, buffer, fp.gcount());
-    }
+        ss.clear();
 
-    SHA256_Final(hash, &ctx);
+        fp.read(buffer, buffer_size);
+        for (size_t i = 0; i < buffer_size; i++)
+        {
+            ss << buffer[i];
+        }
+
+        std::string block = ss.str();
+        hash = SHA256((const unsigned char*)block.c_str(), block.size(), hash);
+    }
     fp.close();
 
     std::ostringstream os;
@@ -45,6 +49,8 @@ std::string SHA256(const char* const path)
     for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
         os << std::setw(2) << static_cast<unsigned int>(hash[i]);
     }
+
+    delete hash;
 
     return os.str();
 }
