@@ -14,4 +14,4 @@ WORKDIR /app/src/build
 RUN cmake ..
 RUN cmake --build . --config Release
 
-CMD [ "ContinuousDeliveryAPI/Server" ]
+ENTRYPOINT [ "ContinuousDeliveryAPI/Server" ]
