@@ -5,10 +5,9 @@
 
 #include <filesystem>
 
-ContinuousDelivery::DeliveryServer server("0.0.0.0", 8080);
 
 int main() {
-
+	ContinuousDelivery::DeliveryServer server("0.0.0.0", std::stoi(std::getenv("ServerPort")));
 	std::cout << "Starting!\n";
 	//server.AddProductInstalation({
 	//	.InstalationFolder = std::filesystem::current_path().string() + "\\Test",
