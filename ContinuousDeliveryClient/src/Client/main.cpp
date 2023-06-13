@@ -1,7 +1,7 @@
 
 #include "httplib.h"
 
-#include "FileHashes.h"
+#include "FileHashes/FileHashes.h"
 
 #include <yaml-cpp/yaml.h>
 

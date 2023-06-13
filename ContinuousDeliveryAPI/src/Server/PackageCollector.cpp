@@ -1,6 +1,6 @@
 #include "PackageCollector.h"
 
-#include "FileHashes.h"
+#include "FileHashes/FileHashes.h"
 
 #include <yaml-cpp/yaml.h>
 

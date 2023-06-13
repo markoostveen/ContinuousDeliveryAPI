@@ -18,7 +18,7 @@ std::string SHA256(const char* const path)
 {
     std::ifstream fp(path, std::ios::in | std::ios::binary);
 
-    if (not fp.good()) {
+    if (!fp.good()) {
         std::ostringstream os;
         throw std::runtime_error(os.str());
     }
