@@ -6,3 +6,5 @@ ContinuousDeliveryAPI/x64/
 .vs/
 
 x64/
+
+build/
