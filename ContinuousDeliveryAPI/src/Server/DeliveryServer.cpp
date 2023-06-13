@@ -36,7 +36,10 @@ namespace ContinuousDelivery {
 
 			_isStarted = true;
 			
-			_serverThread = std::jthread([_hostName = HostName(), _port = Port()]() { server.listen(_hostName.c_str(), _port); });
+			_serverThread = std::jthread([_hostName = HostName(), _port = Port()]()
+			{
+				server.listen(_hostName.c_str(), _port);
+			});
 
 			LoadConfigFile();
 			RegisterRoutes();
@@ -50,6 +53,7 @@ namespace ContinuousDelivery {
 				while (true) {
 					std::cout << "\r>>> ";
 					std::cin >> this->lastChar;
+					std::this_thread::sleep_for(std::chrono::milliseconds(100));
 				}
 				});
 
@@ -172,6 +176,9 @@ namespace ContinuousDelivery {
 
 	void DeliveryServer::LoadConfigFile()
 	{
+		if(!std::filesystem::exists(DeliveryServerConfigFile))
+			return;
+
 		std::ifstream configFile(DeliveryServerConfigFile, std::ios::in);
 		std::stringstream buffer;
 		buffer << configFile.rdbuf();
